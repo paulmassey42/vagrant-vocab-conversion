@@ -163,11 +163,18 @@ class VocabMappingGermany:
         if value != "" :
             g.add((uri,predicate,self.text(self.sanitise_label(value))))            
         
+    def add_isco(self,item,uri,g):
+        value = item[isco_label.lower()]
+        if value != "" :
+            code=value.split()[1]
+            isco_ref = URIRef("http://data.europa.eu/esco/isco2008/Concept/C"+code)
+            g.add((uri,ESCOMODEL.memberOfISCOGroup,isco_ref))
+        
     def add_activities(self,item,uri,g):
-        activities = item[activities_label.lower()]
-        if activities != "" :
-            for activity in activities.splitlines():
-                g.add((uri,VOCAB.activity,self.text(self.sanitise_label(activity))))
+        values = item[activities_label.lower()]
+        if values != "" :
+            for value in values.splitlines():
+                g.add((uri,VOCAB.activity,self.text(self.sanitise_label(value))))
 
     def add_competencies(self,item,uri,g):
         competencies = item[competencies_label.lower()]
@@ -176,7 +183,7 @@ class VocabMappingGermany:
                 g.add((uri,VOCAB.competency,self.text(self.sanitise_label(competency))))
     
     def add_extras(self,item,uri,g):
-        self.add_value_label(item,isco_label,VOCAB.isco,uri,g)
+        self.add_isco(item,uri,g)
         self.add_value_label(item,type_label,VOCAB.detype,uri,g)
         # self.add_value_label(item,maingroup_label,VOCAB.maingroup,uri,g)
         self.add_value_label(item,description5_label,VOCAB.description5,uri,g)        
