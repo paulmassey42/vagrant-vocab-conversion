@@ -1,0 +1,28 @@
+#+TITLE: vagrant-vocab-conversion
+
+* Introduction
+
+The development environment for the vocab conversion
+script. Assumption is that a Ubuntu/Debian compactible system is
+available (use vagrant if on windows). Otherwise the bootstrap.sh
+script will indicate what is needed for the most part.
+
+Outside of the vagrant environment, configure will check what is
+installed, etc. and fill in the appropriate values in the various .in
+files (or flag an error if something is missing).
+
+* Usage
+
+The first time:
+
+#+BEGIN_SRC bash
+autoconf
+./configure
+#+END_SRC
+
+there after all that should be required is "make" in teh same directory.
+
+* End result
+
+Can be found in the data.ttl file.
+
