@@ -1,10 +1,6 @@
 ###############################################################################
 # This will be converted to the Makefile via the configure script
 
-TAR=@TAR@
-IPNAME=@IPNAME@
-SUBNAME=@SUBNAME@
-
 SYSTEM=system
 XLS2RDF=system/scripts/XLS2RDF.py
 
@@ -23,10 +19,10 @@ cleanfiles:
 # The following will create the .ttl data files from the respective
 # excel files. 
 
-${CVXSL2VDM}: ${XLS2RDF}.in configure
+${XLS2RDF}: ${XLS2RDF}.in configure.ac
 	./configure
 
-ttldata: data.ttl 
+ttldata:  ${XLS2RDF}  data.ttl 
 
 data.ttl: excelfiles/Vorlage-for-Mapping-DKZ-ESCO_Stand-240216.xlsx ${XLS2RDF} 
 	@PYTHON3@ ${XLS2RDF} excelfiles/Vorlage-for-Mapping-DKZ-ESCO_Stand-240216.xlsx > data.ttl

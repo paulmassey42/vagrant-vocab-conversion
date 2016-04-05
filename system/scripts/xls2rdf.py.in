@@ -53,8 +53,9 @@ level4_label="Bezeichnung3"
 level5_id="BA-Systematik Ebene 5"
 level5_label="Bezeichnung4"
 
-endpos_label="Endposition (8-Steller)"
+endpos_label="Endposition (8-Steller)"   # level 6
 jobname_label="Berufsposition (Bezeichnung)"
+
 x2="berufskundl. Typ"
 x3="Berufskundliche Hautpgruppe"
 x4="Bezeichnung5"
@@ -161,14 +162,6 @@ class VocabMappingGermany:
             for training in trainings.splitlines():
                 g.add((uri,VOCAB.training,self.text(self.sanitise_label(training))))
 
-    def add_end_position(self,item,uri,g):
-        endpos = item[endpos_label.lower()]
-        g.add((uri,VOCAB.end_position_identifier,self.text(self.sanitise_label(endpos))))
-        
-    def add_jobname(self,item,uri,g):
-        jobname = item[jobname_label.lower()]
-        g.add((uri,VOCAB.jobname,self.text(self.sanitise_label(jobname))))
-        
     def add_skilllevel(self,item,uri,g):
         skilllevel = item[skill_label.lower()]
         g.add((uri,VOCAB.skilllevel,self.text(self.sanitise_label(skilllevel))))
@@ -197,7 +190,6 @@ class VocabMappingGermany:
     
     def add_extras(self,item,uri,g):
         self.add_isco_level(item,uri,g)
-        self.add_end_position(item,uri,g)
         self.add_drq_level(item,uri,g)
         self.add_skilllevel(item,uri,g)        
         self.add_competencies(item,uri,g)
@@ -245,17 +237,30 @@ class VocabMappingGermany:
         g.add((uri5,RDF.type,ESCOMODEL.SimpleConcept))                
         g.add((uri5,SKOS.prefLabel,label5_ref))
 
-        self.add_extras(item,uri5,g)
+        # This is the bottom level
+        endpos = item[endpos_label.lower()]
+        jobname = item[jobname_label.lower()]
+        label6_ref=self.create_label(endpos,jobname,g)        
+        uri6=self.uri_id(endpos)
+        g.add((uri6,RDF.type,SKOS.Concept))
+        g.add((uri6,RDF.type,ESCOMODEL.SimpleConcept))                
+        g.add((uri6,SKOS.prefLabel,label6_ref))
+        g.add((uri6,VOCAB.end_position_identifier,self.text(self.sanitise_label(jobname))))
+        g.add((uri6,VOCAB.jobname,self.text(self.sanitise_label(jobname))))
+        
+        self.add_extras(item,uri6,g)
 
         g.add((uri1,SKOS.narrower,uri2))
         g.add((uri2,SKOS.narrower,uri3))
         g.add((uri3,SKOS.narrower,uri4))
-        g.add((uri4,SKOS.narrower,uri5))        
+        g.add((uri4,SKOS.narrower,uri5))
+        g.add((uri5,SKOS.narrower,uri6))                
         
         g.add((uri2,SKOS.broader,uri1))
         g.add((uri3,SKOS.broader,uri2))
         g.add((uri4,SKOS.broader,uri3))
-        g.add((uri5,SKOS.broader,uri4))        
+        g.add((uri5,SKOS.broader,uri4))
+        g.add((uri6,SKOS.broader,uri5))                
         
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
