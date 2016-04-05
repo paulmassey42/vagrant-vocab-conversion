@@ -20,16 +20,23 @@ Uses:
 
 * Usage
 
-The first time:
+The first time it will be necessary to pregenerate some files using
+the following commands.
 
 #+BEGIN_SRC bash
 autoconf
 ./configure
 #+END_SRC
 
-there after all that should be required is "make" in the same
+There after all that should be required is to use "make" in the same
 directory (in the vagrant environment this is the /vagrant directory).
+Any updates the .in script and configure.ac files will be picked up.
+
+* Adding new scripts
+
+It should be possible to extend the Makefile.in with new targets for
+the build.
 
 * End result
 
-Can be found in the data.ttl file.
+Can be found in the 'data.ttl' file.
