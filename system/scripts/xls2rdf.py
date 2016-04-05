@@ -30,7 +30,7 @@ import rdflib
 import hashlib
 
 from rdflib import URIRef, Literal
-from rdflib.namespace import RDF, RDFS, SKOS, DCTERMS
+from rdflib.namespace import RDF, RDFS, SKOS, DCTERMS, XSD
 VOCAB = rdflib.Namespace("http://data.europa.eu/esco/de#")
 SKOSXL = rdflib.Namespace("http://www.w3.org/2008/05/skos-xl#")
 SKOSTHES = rdflib.Namespace("http://purl.org/iso25964/skos-thes#")
@@ -117,12 +117,16 @@ class VocabMappingGermany:
         '''Return an RDF Literal with the text.'''
         return Literal(text, lang="de")
 
+    def integer(self, text):
+        '''Return an RDF Literal with the text.'''
+        return Literal(text, datatype=XSD.integer)
+        
     def sanitise_label(self, text):
         '''Return a sanitised label - new newlines, tabs, '|' or ',' characters'''
         str0 = text.replace("\n"," ").replace("\r"," ").replace("\t"," ")
         str1 = str0.replace("|"," ").replace(","," ")
         return str1;
-        
+    
     def split(self, values):
         '''Split a comma-separated list of values.'''
         return re.split(r"\s*,\s*", values)
@@ -139,7 +143,10 @@ class VocabMappingGermany:
     def convert_rows(self, g):
         '''Add the contents of the 'Tabelle1' sheet to the graph g.'''
         for item in self.read_sheet("Tabelle1", ""):
-            self.convert_row(item,g)
+            identifier1 = item[level1_id.lower()]
+            # check row is not empty
+            if identifier1 != "" :
+                self.convert_row(item,g)
 
     def cv_common(self,item,g,uri):
         g.add((uri, DCTERMS.description, self.text(item["description"].strip())))
@@ -164,7 +171,7 @@ class VocabMappingGermany:
 
     def add_skilllevel(self,item,uri,g):
         skilllevel = item[skill_label.lower()]
-        g.add((uri,VOCAB.skilllevel,self.text(self.sanitise_label(skilllevel))))
+        g.add((uri,VOCAB.skilllevel,self.integer(self.sanitise_label(skilllevel))))
         
     def add_drq_level(self,item,uri,g):
         drq_level = item[drq_level_label.lower()]
@@ -239,28 +246,28 @@ class VocabMappingGermany:
 
         # This is the bottom level
         endpos = item[endpos_label.lower()]
-        jobname = item[jobname_label.lower()]
-        label6_ref=self.create_label(endpos,jobname,g)        
-        uri6=self.uri_id(endpos)
-        g.add((uri6,RDF.type,SKOS.Concept))
-        g.add((uri6,RDF.type,ESCOMODEL.SimpleConcept))                
-        g.add((uri6,SKOS.prefLabel,label6_ref))
-        g.add((uri6,VOCAB.end_position_identifier,self.text(self.sanitise_label(jobname))))
-        g.add((uri6,VOCAB.jobname,self.text(self.sanitise_label(jobname))))
-        
-        self.add_extras(item,uri6,g)
+        if endpos != "" :
+            jobname = item[jobname_label.lower()]
+            label6_ref=self.create_label(endpos,jobname,g)        
+            uri6=self.uri_id(endpos)
+            g.add((uri6,RDF.type,SKOS.Concept))
+            g.add((uri6,RDF.type,ESCOMODEL.SimpleConcept))                
+            g.add((uri6,SKOS.prefLabel,label6_ref))
+            g.add((uri6,VOCAB.end_position_identifier,self.text(self.sanitise_label(jobname))))
+            g.add((uri6,VOCAB.jobname,self.text(self.sanitise_label(jobname))))
+            self.add_extras(item,uri6,g)
+            g.add((uri5,SKOS.narrower,uri6))                
+            g.add((uri6,SKOS.broader,uri5))                
 
         g.add((uri1,SKOS.narrower,uri2))
         g.add((uri2,SKOS.narrower,uri3))
         g.add((uri3,SKOS.narrower,uri4))
         g.add((uri4,SKOS.narrower,uri5))
-        g.add((uri5,SKOS.narrower,uri6))                
         
         g.add((uri2,SKOS.broader,uri1))
         g.add((uri3,SKOS.broader,uri2))
         g.add((uri4,SKOS.broader,uri3))
         g.add((uri5,SKOS.broader,uri4))
-        g.add((uri6,SKOS.broader,uri5))                
         
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
