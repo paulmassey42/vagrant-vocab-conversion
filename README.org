@@ -25,4 +25,3 @@ there after all that should be required is "make" in teh same directory.
 * End result
 
 Can be found in the data.ttl file.
-
