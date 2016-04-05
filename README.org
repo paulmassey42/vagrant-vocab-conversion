@@ -14,7 +14,7 @@ files (or flag an error if something is missing).
 * Script
 
 Uses:
-- Python
+- Python 3
 - [[http://rdflib.readthedocs.org/en/stable/index.html][Rdflib]] for RDF operations
 - [[https://secure.simplistix.co.uk/svn/xlrd/trunk/xlrd/doc/xlrd.html?p=4966][xlrd]] for parsing the excel input files.
 

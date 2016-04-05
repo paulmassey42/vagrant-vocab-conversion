@@ -1,27 +1,7 @@
 #!/usr/bin/env python3
-# Convert a spreadsheet containing goals, transactions, high level
-# requirements, information requirements, and business rules, according to
-# the e-Document engineering methodology, to RDF satisfying the MDR vocabulary.
 #
-# Copyright 2014 European Union
-# Author: Vianney le Clément de Saint-Marcq (PwC EU Services)
+# Originally derived from one coming from the MDR project.
 #
-# Licensed under the EUPL, Version 1.1 or - as soon they
-# will be approved by the European Commission - subsequent
-# versions of the EUPL (the "Licence");
-# You may not use this work except in compliance with the
-# Licence.
-# You may obtain a copy of the Licence at:
-# http://ec.europa.eu/idabc/eupl
-#
-# Unless required by applicable law or agreed to in
-# writing, software distributed under the Licence is
-# distributed on an "AS IS" basis,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-# express or implied.
-# See the Licence for the specific language governing
-# permissions and limitations under the Licence.
-
 import argparse
 import sys
 import re
@@ -271,7 +251,7 @@ class VocabMappingGermany:
         
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.description = "Convert the ."
+    ap.description = "Convert the german xls file."
     ap.add_argument("xlsfile", help="input XLS(X) file")
     ap.add_argument("-N", "--namespace",
                     default="http://data.europa.eu/esco/de/",
