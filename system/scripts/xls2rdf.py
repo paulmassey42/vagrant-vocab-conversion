@@ -1,27 +1,7 @@
 #!/usr/bin/env python3
-# Convert a spreadsheet containing goals, transactions, high level
-# requirements, information requirements, and business rules, according to
-# the e-Document engineering methodology, to RDF satisfying the MDR vocabulary.
 #
-# Copyright 2014 European Union
-# Author: Vianney le Clément de Saint-Marcq (PwC EU Services)
+# Originally derived from one coming from the MDR project.
 #
-# Licensed under the EUPL, Version 1.1 or - as soon they
-# will be approved by the European Commission - subsequent
-# versions of the EUPL (the "Licence");
-# You may not use this work except in compliance with the
-# Licence.
-# You may obtain a copy of the Licence at:
-# http://ec.europa.eu/idabc/eupl
-#
-# Unless required by applicable law or agreed to in
-# writing, software distributed under the Licence is
-# distributed on an "AS IS" basis,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-# express or implied.
-# See the Licence for the specific language governing
-# permissions and limitations under the Licence.
-
 import argparse
 import sys
 import re
@@ -56,13 +36,13 @@ level5_label="Bezeichnung4"
 endpos_label="Endposition (8-Steller)"   # level 6
 jobname_label="Berufsposition (Bezeichnung)"
 
-x2="berufskundl. Typ"
-x3="Berufskundliche Hautpgruppe"
-x4="Bezeichnung5"
-x5="Berufskundliche Grobgruppe"
-x6="Bezeichnung6"
-x7="BKGR"
-x8="Bezeichnung7"
+type_label="berufskundl. Typ"
+maingroup_label="Berufskundliche Hautpgruppe"
+description5_label="Bezeichnung5"
+group_label="Berufskundliche Grobgruppe"
+description6_label="Bezeichnung6"
+bkgr_label="BKGR"
+description7_label="Bezeichnung7"
 skill_label="Qualifikationsniveau 1=Anlern-/Hilfsniveau 2=Ausbildungsniveau 3=Weiterbildungsniveau 4=Hochschulniveau"
 drq_level_label="DQR-Niveau"
 isco_label="ISCO 08-Zuordnung"
@@ -176,12 +156,12 @@ class VocabMappingGermany:
     def add_drq_level(self,item,uri,g):
         drq_level = item[drq_level_label.lower()]
         if drq_level != "" :        
-            g.add((uri,VOCAB.drq_level,self.text(self.sanitise_label(drq_level))))
+            g.add((uri,VOCAB.drq_level,self.integer(self.sanitise_label(drq_level))))
         
-    def add_isco_level(self,item,uri,g):
-        val = item[isco_label.lower()]
-        if val != "" :        
-            g.add((uri,VOCAB.isco,self.text(self.sanitise_label(val))))
+    def add_value_label(self,item,label,predicate,uri,g):
+        value = item[label.lower()]
+        if value != "" :
+            g.add((uri,predicate,self.text(self.sanitise_label(value))))            
         
     def add_activities(self,item,uri,g):
         activities = item[activities_label.lower()]
@@ -196,7 +176,12 @@ class VocabMappingGermany:
                 g.add((uri,VOCAB.competency,self.text(self.sanitise_label(competency))))
     
     def add_extras(self,item,uri,g):
-        self.add_isco_level(item,uri,g)
+        self.add_value_label(item,isco_label,VOCAB.isco,uri,g)
+        self.add_value_label(item,type_label,VOCAB.detype,uri,g)
+        # self.add_value_label(item,maingroup_label,VOCAB.maingroup,uri,g)
+        self.add_value_label(item,description5_label,VOCAB.description5,uri,g)        
+        # self.add_value_label(item,bkgr_label,VOCAB.bkgr,uri,g)
+        # self.add_value_label(item,group_label,VOCAB.group_label,uri,g)        
         self.add_drq_level(item,uri,g)
         self.add_skilllevel(item,uri,g)        
         self.add_competencies(item,uri,g)
@@ -271,7 +256,7 @@ class VocabMappingGermany:
         
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.description = "Convert the ."
+    ap.description = "Convert the german xls file."
     ap.add_argument("xlsfile", help="input XLS(X) file")
     ap.add_argument("-N", "--namespace",
                     default="http://data.europa.eu/esco/de/",

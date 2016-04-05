@@ -36,13 +36,13 @@ level5_label="Bezeichnung4"
 endpos_label="Endposition (8-Steller)"   # level 6
 jobname_label="Berufsposition (Bezeichnung)"
 
-x2="berufskundl. Typ"
-x3="Berufskundliche Hautpgruppe"
-x4="Bezeichnung5"
-x5="Berufskundliche Grobgruppe"
-x6="Bezeichnung6"
-x7="BKGR"
-x8="Bezeichnung7"
+type_label="berufskundl. Typ"
+maingroup_label="Berufskundliche Hautpgruppe"
+description5_label="Bezeichnung5"
+group_label="Berufskundliche Grobgruppe"
+description6_label="Bezeichnung6"
+bkgr_label="BKGR"
+description7_label="Bezeichnung7"
 skill_label="Qualifikationsniveau 1=Anlern-/Hilfsniveau 2=Ausbildungsniveau 3=Weiterbildungsniveau 4=Hochschulniveau"
 drq_level_label="DQR-Niveau"
 isco_label="ISCO 08-Zuordnung"
@@ -156,18 +156,18 @@ class VocabMappingGermany:
     def add_drq_level(self,item,uri,g):
         drq_level = item[drq_level_label.lower()]
         if drq_level != "" :        
-            g.add((uri,VOCAB.drq_level,self.text(self.sanitise_label(drq_level))))
+            g.add((uri,VOCAB.drq_level,self.integer(self.sanitise_label(drq_level))))
         
-    def add_isco_level(self,item,uri,g):
-        val = item[isco_label.lower()]
-        if val != "" :        
-            g.add((uri,VOCAB.isco,self.text(self.sanitise_label(val))))
+    def add_value_label(self,item,label,predicate,uri,g):
+        value = item[label.lower()]
+        if value != "" :
+            g.add((uri,predicate,self.text(self.sanitise_label(value))))            
         
     def add_activities(self,item,uri,g):
-        activities = item[activities_label.lower()]
-        if activities != "" :
-            for activity in activities.splitlines():
-                g.add((uri,VOCAB.activity,self.text(self.sanitise_label(activity))))
+        values = item[activities_label.lower()]
+        if values != "" :
+            for value in values.splitlines():
+                g.add((uri,VOCAB.activity,self.text(self.sanitise_label(value))))
 
     def add_competencies(self,item,uri,g):
         competencies = item[competencies_label.lower()]
@@ -176,7 +176,12 @@ class VocabMappingGermany:
                 g.add((uri,VOCAB.competency,self.text(self.sanitise_label(competency))))
     
     def add_extras(self,item,uri,g):
-        self.add_isco_level(item,uri,g)
+        self.add_value_label(item,isco_label,VOCAB.isco,uri,g)
+        self.add_value_label(item,type_label,VOCAB.detype,uri,g)
+        # self.add_value_label(item,maingroup_label,VOCAB.maingroup,uri,g)
+        self.add_value_label(item,description5_label,VOCAB.description5,uri,g)        
+        # self.add_value_label(item,bkgr_label,VOCAB.bkgr,uri,g)
+        # self.add_value_label(item,group_label,VOCAB.group_label,uri,g)        
         self.add_drq_level(item,uri,g)
         self.add_skilllevel(item,uri,g)        
         self.add_competencies(item,uri,g)
