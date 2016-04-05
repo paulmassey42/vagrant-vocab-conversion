@@ -40,3 +40,11 @@ the build.
 * End result
 
 Can be found in the 'data.ttl' file.
+
+* TODOs
+
+Include build option for:
+
+https://pythonhosted.org/django-jython/war-deployment.html
+
+
