@@ -1,0 +1,23 @@
+AC_INIT(vdm, 0.1, paul.massey@tenforce.com)
+AC_SUBST(SUBNAME, vdm)
+AC_PROG_AWK
+AC_PROG_GREP
+AC_PROG_SED
+AC_CHECK_PROG(FIND, [find], [/usr/bin/find])
+AC_CHECK_PROG(DOS2UNIX, [dos2unix], [/usr/bin/dos2unix])
+AC_CHECK_PROG(PYTHON, [python],[/usr/bin/python])
+AC_CHECK_PROG(PYTHON27, [python2.7],[/usr/bin/python2.7])
+AC_CHECK_PROG(PYTHON3, [python3],[/usr/bin/python3])
+AC_CHECK_PROG(DOCKER, [docker],[/usr/bin/docker])
+AC_CHECK_PROG(TAR, [tar],[/bin/tar])
+AC_CHECK_PROG(SORT, [sort],[/usr/bin/sort])
+AC_CHECK_PROG(AWK, [awk],[/usr/bin/awk])
+AC_CHECK_PROG(TR, [tr],[/usr/bin/tr])
+AC_CHECK_PROG(ROQET, [roqet],[/usr/bin/roqet])
+AC_CHECK_PROG(MAKE, [make], [/usr/bin/make])
+AC_CHECK_PROG(EMACS, [emacs],[/usr/bin/emacs])
+AC_CHECK_PROG(XSLTPROC, [xsltproc],[/usr/bin/xsltproc])
+AC_CHECK_PROG(SSH,[ssh],[/usr/bin/ssh])
+AC_CHECK_PROG(SCP,[scp],[/usr/bin/scp])
+AC_CONFIG_FILES([Makefile system/scripts/xls2rdf.py],[chmod +x system/scripts/xls2rdf.py])
+AC_OUTPUT
