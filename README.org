@@ -27,7 +27,8 @@ autoconf
 ./configure
 #+END_SRC
 
-there after all that should be required is "make" in teh same directory.
+there after all that should be required is "make" in the same
+directory (in the vagrant environment this is the /vagrant directory).
 
 * End result
 
