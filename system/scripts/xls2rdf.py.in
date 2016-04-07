@@ -16,6 +16,8 @@ SKOSXL = rdflib.Namespace("http://www.w3.org/2008/05/skos-xl#")
 SKOSTHES = rdflib.Namespace("http://purl.org/iso25964/skos-thes#")
 ESCOMODEL = rdflib.Namespace("http://data.europa.eu/esco/model#")
 
+BERUFENET = URIRef("http://data.europa.eu/esco/ConceptScheme/Berufe")
+
 # Strings indicating that labels at the top of the file
 
 level1_id="BA-Systematik Ebene 1"
@@ -97,9 +99,9 @@ class VocabMappingGermany:
         '''Return an RDF Literal with the text.'''
         return Literal(text, lang="de")
 
-    def integer(self, text):
+    def rdfinteger(self, strin):
         '''Return an RDF Literal with the text.'''
-        return Literal(text, datatype=XSD.integer)
+        return Literal(int(strin),datatype=XSD.integer)
         
     def sanitise_label(self, text):
         '''Return a sanitised label - new newlines, tabs, '|' or ',' characters'''
@@ -128,13 +130,6 @@ class VocabMappingGermany:
             if identifier1 != "" :
                 self.convert_row(item,g)
 
-    def cv_common(self,item,g,uri):
-        g.add((uri, DCTERMS.description, self.text(item["description"].strip())))
-        g.add((uri, SKOS.definition, self.text(item["definition"].strip())))
-        pubid = item["public identifier (uri)"]
-        if pubid != "":
-            g.add((uri, DCTERMS.identifier, URIRef(pubid)))
-
     def create_label(self,id,label,g):
         uri = self.uri_id("L"+id)
         g.add((uri,RDF.type,SKOSXL.Label))
@@ -150,19 +145,31 @@ class VocabMappingGermany:
                 g.add((uri,VOCAB.training,self.text(self.sanitise_label(training))))
 
     def add_skilllevel(self,item,uri,g):
-        skilllevel = item[skill_label.lower()]
-        g.add((uri,VOCAB.skilllevel,self.integer(self.sanitise_label(skilllevel))))
+        skilllevels = item[skill_label.lower()]
+        for skilllevel in skilllevels.splitlines():
+            g.add((uri,VOCAB.skilllevel,self.rdfinteger(self.sanitise_label(skilllevel))))
         
     def add_drq_level(self,item,uri,g):
-        drq_level = item[drq_level_label.lower()]
-        if drq_level != "" :        
-            g.add((uri,VOCAB.drq_level,self.integer(self.sanitise_label(drq_level))))
+        drq_levels = item[drq_level_label.lower()]
+        if drq_levels != "" :
+            for drq_level in drq_levels.splitlines():
+                g.add((uri,VOCAB.drq_level,self.rdfinteger(self.sanitise_label(drq_level))))
+        
+    def add_value_text(self,item,label,predicate,uri,g):
+        value = item[label.lower()]
+        if value != "" :
+            g.add((uri,predicate,self.text(value)))           
         
     def add_value_label(self,item,label,predicate,uri,g):
         value = item[label.lower()]
         if value != "" :
             g.add((uri,predicate,self.text(self.sanitise_label(value))))            
-        
+
+    def add_value_integer(self,item,label,predicate,uri,g):
+        value = item[label.lower()]
+        if value != "" :
+            g.add((uri,predicate,self.rdfinteger(value)))           
+
     def add_isco(self,item,uri,g):
         value = item[isco_label.lower()]
         if value != "" :
@@ -185,10 +192,10 @@ class VocabMappingGermany:
     def add_extras(self,item,uri,g):
         self.add_isco(item,uri,g)
         self.add_value_label(item,type_label,VOCAB.detype,uri,g)
-        # self.add_value_label(item,maingroup_label,VOCAB.maingroup,uri,g)
+        self.add_value_integer(item,maingroup_label,VOCAB.maingroup,uri,g)
         self.add_value_label(item,description5_label,VOCAB.description5,uri,g)        
-        # self.add_value_label(item,bkgr_label,VOCAB.bkgr,uri,g)
-        # self.add_value_label(item,group_label,VOCAB.group_label,uri,g)        
+        self.add_value_integer(item,bkgr_label,VOCAB.bkgr,uri,g)
+        self.add_value_integer(item,group_label,VOCAB.group,uri,g)        
         self.add_drq_level(item,uri,g)
         self.add_skilllevel(item,uri,g)        
         self.add_competencies(item,uri,g)
@@ -201,40 +208,46 @@ class VocabMappingGermany:
         label1_ref=self.create_label(identifier1,label1,g)
         uri1=self.uri_id(identifier1)
         g.add((uri1,RDF.type,SKOS.Concept))
-        g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))                        
-        g.add((uri1,SKOS.prefLabel,label1_ref))
+        g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
+        g.add((uri1,SKOS.inScheme,BERUFENET))
+        g.add((uri1,SKOS.topConceptOf,BERUFENET))
+        g.add((uri1,SKOSXL.prefLabel,label1_ref))
         
         identifier2 = item[level2_id.lower()]
         label2 = item[level2_label.lower()]
         label2_ref=self.create_label(identifier2,label2,g)
         uri2=self.uri_id(identifier2)
         g.add((uri2,RDF.type,SKOS.Concept))
-        g.add((uri2,RDF.type,ESCOMODEL.SimpleConcept))                        
-        g.add((uri2,SKOS.prefLabel,label2_ref))
+        g.add((uri2,RDF.type,ESCOMODEL.SimpleConcept))
+        g.add((uri2,SKOS.inScheme,BERUFENET))        
+        g.add((uri2,SKOSXL.prefLabel,label2_ref))
         
         identifier3 = item[level3_id.lower()]
         label3 = item[level3_label.lower()]
         label3_ref=self.create_label(identifier3,label3,g)
         uri3=self.uri_id(identifier3)
         g.add((uri3,RDF.type,SKOS.Concept))
-        g.add((uri3,RDF.type,ESCOMODEL.SimpleConcept))                
-        g.add((uri3,SKOS.prefLabel,label3_ref))
+        g.add((uri3,RDF.type,ESCOMODEL.SimpleConcept))
+        g.add((uri3,SKOS.inScheme,BERUFENET))        
+        g.add((uri3,SKOSXL.prefLabel,label3_ref))
 
         identifier4 = item[level4_id.lower()]
         label4 = item[level4_label.lower()]
         label4_ref=self.create_label(identifier4,label4,g)
         uri4=self.uri_id(identifier4)
         g.add((uri4,RDF.type,SKOS.Concept))
-        g.add((uri4,RDF.type,ESCOMODEL.SimpleConcept))                
-        g.add((uri4,SKOS.prefLabel,label4_ref))
+        g.add((uri4,RDF.type,ESCOMODEL.SimpleConcept))
+        g.add((uri4,SKOS.inScheme,BERUFENET))        
+        g.add((uri4,SKOSXL.prefLabel,label4_ref))
 
         identifier5 = item[level5_id.lower()]
         label5 = item[level5_label.lower()]
         label5_ref=self.create_label(identifier5,label5,g)
         uri5=self.uri_id(identifier5)
         g.add((uri5,RDF.type,SKOS.Concept))
-        g.add((uri5,RDF.type,ESCOMODEL.SimpleConcept))                
-        g.add((uri5,SKOS.prefLabel,label5_ref))
+        g.add((uri5,RDF.type,ESCOMODEL.SimpleConcept))
+        g.add((uri5,SKOS.inScheme,BERUFENET))        
+        g.add((uri5,SKOSXL.prefLabel,label5_ref))
 
         # This is the bottom level
         endpos = item[endpos_label.lower()]
@@ -244,9 +257,8 @@ class VocabMappingGermany:
             uri6=self.uri_id(endpos)
             g.add((uri6,RDF.type,SKOS.Concept))
             g.add((uri6,RDF.type,ESCOMODEL.SimpleConcept))                
-            g.add((uri6,SKOS.prefLabel,label6_ref))
-            g.add((uri6,VOCAB.end_position_identifier,self.text(self.sanitise_label(jobname))))
-            g.add((uri6,VOCAB.jobname,self.text(self.sanitise_label(jobname))))
+            g.add((uri6,SKOS.inScheme,BERUFENET))            
+            g.add((uri6,SKOSXL.prefLabel,label6_ref))
             self.add_extras(item,uri6,g)
             g.add((uri5,SKOS.narrower,uri6))                
             g.add((uri6,SKOS.broader,uri5))                

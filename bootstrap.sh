@@ -13,6 +13,9 @@ apt-get install -y python3-setuptools python-setuptools
 easy_install3 rdflib
 easy_install3 xlrd
 easy_install SPARQLWrapper
+# JYTHON, ETC
+easy_install3 Django
+easy_install3 django-jython
 
 # Make sure it's all installed.
 apt-get -y update --force-yes
