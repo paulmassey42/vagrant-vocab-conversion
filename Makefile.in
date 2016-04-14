@@ -44,6 +44,7 @@ data.ttl: excelfiles/Vorlage-for-Mapping-DKZ-ESCO_Stand-240216.xlsx ${XLS2RDF}
 ROMETTLFILES=arborescences-du-rome.ttl ref-des-appellations.ttl text-sur-les-fiches-rome.ttl
 
 rome:  excelfiles/RefRomeCsv ${ROMETTLFILES}
+	cat ${ROMETTLFILES} | @RAPPER@ -I "junk" -i turtle -o turtle - > rome.ttl
 
 excelfiles/RefRomeCsv: download/RefRomeCsv.zip
 	mkdir -p excelfiles/RefRomeCsv

@@ -22,5 +22,6 @@ AC_CHECK_PROG(SSH,[ssh],[/usr/bin/ssh])
 AC_CHECK_PROG(SCP,[scp],[/usr/bin/scp])
 AC_CHECK_PROG(PERL, [perl], [/usr/bin/perl])
 AC_CHECK_PROG(CSV2XLS, [csv2xls], [/usr/local/bin/csv2xls])
+AC_CHECK_PROG(RAPPER, [rapper], [/usr/bin/rapper])
 AC_CONFIG_FILES([Makefile system/scripts/xls2rdf.py system/scripts/unix_item_arborescence_v328_utf8.py system/scripts/unix_referentiel_appellation_v328_utf8.py system/scripts/unix_cr_gd_dp_v328_utf8.py system/scripts/unix_texte_v328_utf8.py system/scripts/arborescences-du-rome.py system/scripts/ref-des-appellations.py system/scripts/text-sur-les-fiches-rome.py system/bin/csv2xls],[chmod +x system/scripts/*.py system/bin/csv2xls])
 AC_OUTPUT
