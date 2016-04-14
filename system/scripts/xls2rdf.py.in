@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!@PYTHON@
+# -*- coding: utf-8 -*-
 #
 # Originally derived from one coming from the MDR project.
 #
@@ -8,53 +9,29 @@ import re
 import xlrd
 import rdflib
 import hashlib
+import rome
 
 from rdflib import URIRef, Literal
 from rdflib.namespace import RDF, RDFS, SKOS, DCTERMS, XSD
-VOCAB = rdflib.Namespace("http://data.europa.eu/esco/de#")
+VOCAB = rdflib.Namespace("http://data.europa.eu/esco/rome#")
 SKOSXL = rdflib.Namespace("http://www.w3.org/2008/05/skos-xl#")
 SKOSTHES = rdflib.Namespace("http://purl.org/iso25964/skos-thes#")
 ESCOMODEL = rdflib.Namespace("http://data.europa.eu/esco/model#")
 
-BERUFENET = URIRef("http://data.europa.eu/esco/ConceptScheme/Berufe")
+ROME = URIRef("http://data.europa.eu/esco/ConceptScheme/rome")
 
 # Strings indicating that labels at the top of the file
+code_ogr="code_ogr"
+libelle_appellation_long="libelle_appellation_long"
+libelle_appellation_court="libelle_appellation_court"
+code_rome="code_rome"
+code_type_section_appellation="code_type_section_appellation"
+libelle_type_section_appellation="libelle_type_section_appellation"
+statut="statut"
 
-level1_id="BA-Systematik Ebene 1"
-level1_label="Bezeichnung"
+class VocabMappingRome2:
 
-level2_id="BA-Systematik Ebene 2"
-level2_label="Bezeichnung1"
-
-level3_id="BA-Systematik Ebene 3"
-level3_label="Bezeichnung2"
-
-level4_id="BA-Systematik Ebene 4"
-level4_label="Bezeichnung3"
-
-level5_id="BA-Systematik Ebene 5"
-level5_label="Bezeichnung4"
-
-endpos_label="Endposition (8-Steller)"   # level 6
-jobname_label="Berufsposition (Bezeichnung)"
-
-type_label="berufskundl. Typ"
-maingroup_label="Berufskundliche Hautpgruppe"
-description5_label="Bezeichnung5"
-group_label="Berufskundliche Grobgruppe"
-description6_label="Bezeichnung6"
-bkgr_label="BKGR"
-description7_label="Bezeichnung7"
-skill_label="Qualifikationsniveau 1=Anlern-/Hilfsniveau 2=Ausbildungsniveau 3=Weiterbildungsniveau 4=Hochschulniveau"
-drq_level_label="DQR-Niveau"
-isco_label="ISCO 08-Zuordnung"
-trainings_label="Korrespondierende Tatigkeit/Ausbildung"
-competencies_label="Kompetenzen"
-activities_label="Ausubungsformen (Tatigkeit-Tatigkeit)"
-
-class VocabMappingGermany:
-
-    '''The German Spreadsheet Cass handles a spreadsheet. '''
+    '''The Rome2 Spreadsheet Cass handles a spreadsheet. '''
 
     def __init__(self, filename, namespace):
         '''Initialize the spreadsheet.
@@ -93,11 +70,11 @@ class VocabMappingGermany:
 
     def uri_id(self, id):
         '''Return the URI of the id.'''
-        return self.ns.term(''.join(id.split()))
+        return self.ns.term(id)
 
     def text(self, text):
         '''Return an RDF Literal with the text.'''
-        return Literal(text, lang="de")
+        return Literal(text, lang="fr")
 
     def rdfinteger(self, strin):
         '''Return an RDF Literal with the text.'''
@@ -123,11 +100,11 @@ class VocabMappingGermany:
         return g
 
     def convert_rows(self, g):
-        '''Add the contents of the 'Tabelle1' sheet to the graph g.'''
-        for item in self.read_sheet("Tabelle1", ""):
-            identifier1 = item[level1_id.lower()]
+        '''Add the contents of the 'Sheet1' sheet to the graph g.'''
+        for item in self.read_sheet("Sheet1", ""):
+            testrow = item[code_ogr.lower()]
             # check row is not empty
-            if identifier1 != "" :
+            if testrow != "" :
                 self.convert_row(item,g)
 
     def create_label(self,id,label,g):
@@ -137,34 +114,7 @@ class VocabMappingGermany:
         g.add((uri,RDF.type,ESCOMODEL.Label)) 
         g.add((uri,SKOSXL.literalForm,self.text(self.sanitise_label(label))))
         return uri
-
-    def add_trainings(self,item,uri,g):
-        trainings = item[trainings_label.lower()]
-        if trainings != "" :
-            for training in trainings.splitlines():
-                g.add((uri,VOCAB.training,self.text(self.sanitise_label(training))))
-
-    def add_skilllevel(self,item,uri,g):
-        skilllevels = item[skill_label.lower()]
-        for skilllevel in skilllevels.splitlines():
-            g.add((uri,VOCAB.skilllevel,self.rdfinteger(self.sanitise_label(skilllevel))))
         
-    def add_drq_level(self,item,uri,g):
-        drq_levels = item[drq_level_label.lower()]
-        if drq_levels != "" :
-            for drq_level in drq_levels.splitlines():
-                g.add((uri,VOCAB.drq_level,self.rdfinteger(self.sanitise_label(drq_level))))
-        
-    def add_value_text(self,item,label,predicate,uri,g):
-        value = item[label.lower()]
-        if value != "" :
-            g.add((uri,predicate,self.text(value)))           
-        
-    def add_value_label(self,item,label,predicate,uri,g):
-        value = item[label.lower()]
-        if value != "" :
-            g.add((uri,predicate,self.text(self.sanitise_label(value))))            
-
     def add_value_integer(self,item,label,predicate,uri,g):
         value = item[label.lower()]
         if value != "" :
@@ -177,113 +127,41 @@ class VocabMappingGermany:
             isco_ref = URIRef("http://data.europa.eu/esco/isco2008/Concept/C"+code)
             g.add((uri,ESCOMODEL.memberOfISCOGroup,isco_ref))
         
-    def add_activities(self,item,uri,g):
-        values = item[activities_label.lower()]
-        if values != "" :
-            for value in values.splitlines():
-                g.add((uri,VOCAB.activity,self.text(self.sanitise_label(value))))
-
-    def add_competencies(self,item,uri,g):
-        competencies = item[competencies_label.lower()]
-        if competencies != "" :
-            for competency in competencies.splitlines():
-                g.add((uri,VOCAB.competency,self.text(self.sanitise_label(competency))))
-    
-    def add_extras(self,item,uri,g):
-        self.add_isco(item,uri,g)
-        self.add_value_label(item,type_label,VOCAB.detype,uri,g)
-        self.add_value_integer(item,maingroup_label,VOCAB.maingroup,uri,g)
-        self.add_value_label(item,description5_label,VOCAB.description5,uri,g)        
-        self.add_value_integer(item,bkgr_label,VOCAB.bkgr,uri,g)
-        self.add_value_integer(item,group_label,VOCAB.group,uri,g)        
-        self.add_drq_level(item,uri,g)
-        self.add_skilllevel(item,uri,g)        
-        self.add_competencies(item,uri,g)
-        self.add_activities(item,uri,g)
-        self.add_trainings(item,uri,g)        
-
+    # Main Row translation
     def convert_row(self,item,g):
-        identifier1 = item[level1_id.lower()]
-        label1 = item[level1_label.lower()]
-        label1_ref=self.create_label(identifier1,label1,g)
-        uri1=self.uri_id(identifier1)
+        code_rome_id = str(item[code_rome.lower()])
+        label1 = item[libelle_appellation_court.lower()]
+        label1_ref=self.create_label(code_rome_id,label1,g)
+        uri1=self.uri_id(code_rome_id)
+        code_ogr_id = str(int(item[code_ogr.lower()]))
+        uri_ogr=self.uri_id(code_ogr_id)        
         g.add((uri1,RDF.type,SKOS.Concept))
         g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
-        g.add((uri1,SKOS.inScheme,BERUFENET))
-        g.add((uri1,SKOS.topConceptOf,BERUFENET))
-        g.add((uri1,SKOSXL.prefLabel,label1_ref))
+        g.add((uri1,SKOS.inScheme,ROME))
         
-        identifier2 = item[level2_id.lower()]
-        label2 = item[level2_label.lower()]
-        label2_ref=self.create_label(identifier2,label2,g)
-        uri2=self.uri_id(identifier2)
-        g.add((uri2,RDF.type,SKOS.Concept))
-        g.add((uri2,RDF.type,ESCOMODEL.SimpleConcept))
-        g.add((uri2,SKOS.inScheme,BERUFENET))        
-        g.add((uri2,SKOSXL.prefLabel,label2_ref))
-        
-        identifier3 = item[level3_id.lower()]
-        label3 = item[level3_label.lower()]
-        label3_ref=self.create_label(identifier3,label3,g)
-        uri3=self.uri_id(identifier3)
-        g.add((uri3,RDF.type,SKOS.Concept))
-        g.add((uri3,RDF.type,ESCOMODEL.SimpleConcept))
-        g.add((uri3,SKOS.inScheme,BERUFENET))        
-        g.add((uri3,SKOSXL.prefLabel,label3_ref))
+        g.add((uri1,VOCAB.has_details,uri_ogr))
 
-        identifier4 = item[level4_id.lower()]
-        label4 = item[level4_label.lower()]
-        label4_ref=self.create_label(identifier4,label4,g)
-        uri4=self.uri_id(identifier4)
-        g.add((uri4,RDF.type,SKOS.Concept))
-        g.add((uri4,RDF.type,ESCOMODEL.SimpleConcept))
-        g.add((uri4,SKOS.inScheme,BERUFENET))        
-        g.add((uri4,SKOSXL.prefLabel,label4_ref))
-
-        identifier5 = item[level5_id.lower()]
-        label5 = item[level5_label.lower()]
-        label5_ref=self.create_label(identifier5,label5,g)
-        uri5=self.uri_id(identifier5)
-        g.add((uri5,RDF.type,SKOS.Concept))
-        g.add((uri5,RDF.type,ESCOMODEL.SimpleConcept))
-        g.add((uri5,SKOS.inScheme,BERUFENET))        
-        g.add((uri5,SKOSXL.prefLabel,label5_ref))
-
-        # This is the bottom level
-        endpos = item[endpos_label.lower()]
-        if endpos != "" :
-            jobname = item[jobname_label.lower()]
-            label6_ref=self.create_label(endpos,jobname,g)        
-            uri6=self.uri_id(endpos)
-            g.add((uri6,RDF.type,SKOS.Concept))
-            g.add((uri6,RDF.type,ESCOMODEL.SimpleConcept))                
-            g.add((uri6,SKOS.inScheme,BERUFENET))            
-            g.add((uri6,SKOSXL.prefLabel,label6_ref))
-            self.add_extras(item,uri6,g)
-            g.add((uri5,SKOS.narrower,uri6))                
-            g.add((uri6,SKOS.broader,uri5))                
-
-        g.add((uri1,SKOS.narrower,uri2))
-        g.add((uri2,SKOS.narrower,uri3))
-        g.add((uri3,SKOS.narrower,uri4))
-        g.add((uri4,SKOS.narrower,uri5))
-        
-        g.add((uri2,SKOS.broader,uri1))
-        g.add((uri3,SKOS.broader,uri2))
-        g.add((uri4,SKOS.broader,uri3))
-        g.add((uri5,SKOS.broader,uri4))
-        
+        g.add((uri_ogr,RDF.type,SKOS.Concept))
+        g.add((uri_ogr,RDF.type,ESCOMODEL.SimpleConcept))
+        g.add((uri_ogr,SKOS.inScheme,ROME))
+        g.add((uri_ogr,SKOSXL.prefLabel,label1_ref))
+        rome.add_value_integer(self,item,code_ogr,VOCAB.code_ogr,uri_ogr,g)
+        rome.add_value_integer(self,item,statut,VOCAB.statut,uri_ogr,g)
+        rome.add_value_text(self,item,libelle_appellation_long,
+                            SKOSXL.description,uri_ogr,g)
+                
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.description = "Convert the german xls file."
     ap.add_argument("xlsfile", help="input XLS(X) file")
     ap.add_argument("-N", "--namespace",
-                    default="http://data.europa.eu/esco/de/",
+                    default="http://data.europa.eu/esco/rome/",
                     help="output namespace (default: %(default)s)")
     ap.add_argument("-f", "--format", default="turtle",
                     help="serialization format (default: %(default)s)")
     args = ap.parse_args()
-    edoc = VocabMappingGermany(args.xlsfile, args.namespace)
+    edoc = VocabMappingRome2(args.xlsfile, args.namespace)
     g = edoc.convert()
     print(g.serialize(format=args.format).decode())
 
+ 

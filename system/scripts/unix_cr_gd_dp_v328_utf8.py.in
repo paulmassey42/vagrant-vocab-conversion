@@ -1,0 +1,159 @@
+#!@PYTHON@
+# -*- coding: utf-8 -*-
+#
+# Originally derived from one coming from the MDR project.
+#
+import argparse
+import sys
+import re
+import xlrd
+import rdflib
+import hashlib
+import rome
+
+from rdflib import URIRef, Literal
+from rdflib.namespace import RDF, RDFS, SKOS, DCTERMS, XSD
+VOCAB = rdflib.Namespace("http://data.europa.eu/esco/rome#")
+SKOSXL = rdflib.Namespace("http://www.w3.org/2008/05/skos-xl#")
+SKOSTHES = rdflib.Namespace("http://purl.org/iso25964/skos-thes#")
+ESCOMODEL = rdflib.Namespace("http://data.europa.eu/esco/model#")
+
+ROME = URIRef("http://data.europa.eu/esco/ConceptScheme/rome")
+
+# Strings indicating that labels at the top of the file
+code_rome="code_rome"
+libelle_rome="libelle_rome"
+code_grand_domaine="code_grand_domaine"
+libelle_grand_domaine="libelle_grand_domaine"
+code_domaine_professionel="code_domaine_professionel"
+libelle_domaine_professionel="libelle_domaine_professionel"
+
+class VocabMappingRome3:
+
+    '''The Rome2 Spreadsheet Cass handles a spreadsheet. '''
+
+    def __init__(self, filename, namespace):
+        '''Initialize the spreadsheet.
+
+        Arguments:
+        filename -- the path to the xls/xlsx file
+        namespace -- the namespace of the resulting graph
+        '''
+        self.workbook = xlrd.open_workbook(filename)
+        self.ns = rdflib.Namespace(namespace)
+
+    # Utility methods
+
+    def column_name(self, name, prefix):
+        '''Return the normalized column name name.'''
+        name = re.sub("^"+prefix.lower()+r"\s+", "", name.strip().lower())
+        name = re.sub(r"^reference\s+to\s+", "", name)
+        name = re.sub(r"\s+", " ", name)
+        return name
+
+    def read_sheet(self, name, prefix):
+        '''Read the sheet named name and yield the rows as dictionaries indexed
+        by the column name.'''
+        sheet = self.workbook.sheet_by_name(name)
+        header = [self.column_name(sheet.cell(0, i).value, prefix)
+                  for i in range(sheet.ncols)]
+        for i in range(1, sheet.nrows):
+            yield {name:sheet.cell(i, j).value
+                   for j, name in enumerate(header)}
+
+    def uri(self, name):
+        '''Return the URI of name.'''
+        # note: put a lower() before the encode() will mean a case will 
+        # be ignored in the original data sheet (or correct the data sheet).
+        return self.ns.term(URIRef(hashlib.md5(name.encode()).hexdigest()))
+
+    def uri_id(self, id):
+        '''Return the URI of the id.'''
+        return self.ns.term(id)
+
+    def text(self, text):
+        '''Return an RDF Literal with the text.'''
+        return Literal(text, lang="fr")
+
+    def rdfinteger(self, strin):
+        '''Return an RDF Literal with the text.'''
+        return Literal(int(strin),datatype=XSD.integer)
+        
+    def sanitise_label(self, text):
+        '''Return a sanitised label - new newlines, tabs, '|' or ',' characters'''
+        str0 = text.replace("\n"," ").replace("\r"," ").replace("\t"," ")
+        str1 = str0.replace("|"," ").replace(","," ")
+        return str1;
+    
+    def split(self, values):
+        '''Split a comma-separated list of values.'''
+        return re.split(r"\s*,\s*", values)
+
+    # Main methods
+
+    def convert(self):
+        '''Return the RDF Graph corresponding to the spreadsheet.'''
+        g = rdflib.Graph()
+        g.bind("skos", str(SKOS))
+        self.convert_rows(g)
+        return g
+
+    def convert_rows(self, g):
+        '''Add the contents of the 'Sheet1' sheet to the graph g.'''
+        for item in self.read_sheet("Sheet1", ""):
+            testrow = item[code_ogr.lower()]
+            # check row is not empty
+            if testrow != "" :
+                self.convert_row(item,g)
+
+    def create_label(self,id,label,g):
+        uri = self.uri_id("L"+id)
+        g.add((uri,RDF.type,SKOSXL.Label))
+        g.add((uri,RDF.type,SKOSTHES.PreferredTerm))
+        g.add((uri,RDF.type,ESCOMODEL.Label)) 
+        g.add((uri,SKOSXL.literalForm,self.text(self.sanitise_label(label))))
+        return uri
+        
+    def add_value_integer(self,item,label,predicate,uri,g):
+        value = item[label.lower()]
+        if value != "" :
+            g.add((uri,predicate,self.rdfinteger(value)))           
+
+    def add_isco(self,item,uri,g):
+        value = item[isco_label.lower()]
+        if value != "" :
+            code=value.split()[1]
+            isco_ref = URIRef("http://data.europa.eu/esco/isco2008/Concept/C"+code)
+            g.add((uri,ESCOMODEL.memberOfISCOGroup,isco_ref))
+        
+    # Main Row translation
+    def convert_row(self,item,g):
+        code_rome_id = str(item[code_rome.lower()])
+        uri1 = self.uri_id(code_rome_id)
+        code_domaine_professionel_id = str(item[code_domaine_professionel.lower()])
+        uri2 = self.uri_id(code_domaine_professionel_id)        
+        code_grande_domaine_id = str(item[code_grande_domaine.lower()])
+        uri3 = self.uri_id(code_domaine_professionel_id)        
+        g.add((uri1,RDF.type,SKOS.Concept))
+        g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
+        g.add((uri1,SKOS.inScheme,ROME))
+
+        g.add((uri1,SKOS.narrower,uri2))
+        g.add((uri2,SKOS.broader,uri1))
+        g.add((uri3,SKOS.broader,uri2))
+                
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.description = "Convert the german xls file."
+    ap.add_argument("xlsfile", help="input XLS(X) file")
+    ap.add_argument("-N", "--namespace",
+                    default="http://data.europa.eu/esco/rome/",
+                    help="output namespace (default: %(default)s)")
+    ap.add_argument("-f", "--format", default="turtle",
+                    help="serialization format (default: %(default)s)")
+    args = ap.parse_args()
+    edoc = VocabMappingRome2(args.xlsfile, args.namespace)
+    g = edoc.convert()
+    print(g.serialize(format=args.format).decode())
+
+ 

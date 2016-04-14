@@ -2,7 +2,13 @@
 # This will be converted to the Makefile via the configure script
 
 SYSTEM=system
-XLS2RDF=system/scripts/XLS2RDF.py
+XLS2RDF=system/scripts/xls2rdf.py
+
+SCRIPTS=system/scripts
+EXCELFILES=excelfiles/RefRomeCsv
+
+ROMESCRIPTS=system/scripts
+ROMEEXCELFILES=excelfiles/Rome2016-04
 
 data: cleanfiles ttldata
 
@@ -13,21 +19,67 @@ configure: configure.ac
 # Some files are command files which need cleaning up if edited on windows.
 
 cleanfiles:
-	-dos2unix system/*
+	-@DOS2UNIX@ system/*
 
 ###############################################################################
 # The following will create the .ttl data files from the respective
 # excel files. 
 
-${XLS2RDF}: ${XLS2RDF}.in configure.ac
+Makefile: configure.ac Makefile.in
 	./configure
 
-ttldata:  ${XLS2RDF}  data.ttl 
+ttldata:  ${XLS2RDF} data.ttl rome
+
+# German Mapping
 
 data.ttl: excelfiles/Vorlage-for-Mapping-DKZ-ESCO_Stand-240216.xlsx ${XLS2RDF} 
 	@PYTHON3@ ${XLS2RDF} excelfiles/Vorlage-for-Mapping-DKZ-ESCO_Stand-240216.xlsx > data.ttl
 
+# Rome Mapping
+
+# ROMETTLFILES=unix_referentiel_appellation_v328_utf8.ttl unix_item_arborescence_v328_utf8.ttl \
+#	unix_cr_gd_dp_v328_utf8.ttl \
+#	unix_texte_v328_utf8.ttl # labels for B1402, etc.
+
+ROMETTLFILES=arborescences-du-rome.ttl ref-des-appellations.ttl text-sur-les-fiches-rome.ttl
+
+rome:  excelfiles/RefRomeCsv ${ROMETTLFILES}
+
+excelfiles/RefRomeCsv: download/RefRomeCsv.zip
+	mkdir -p excelfiles/RefRomeCsv
+	@UNZIP@ -o -d excelfiles/RefRomeCsv download/RefRomeCsv.zip
+# Translation is manually done for the moment.
+#	for i in excelfiles/RefRomeCsv/*.csv ; do \
+#		LANG="en_US.UTF-8" @CSV2XLS@ -o excelfiles/RefRomeCsv/`basename $$i .csv`.xls $$i ;\
+#	done
+
+arborescences-du-rome.ttl: ${ROMEEXCELFILES}/arborescences-du-rome.xls ${ROMESCRIPTS}/arborescences-du-rome.py.in
+	@PYTHON3@ ${ROMESCRIPTS}/arborescences-du-rome.py ${ROMEEXCELFILES}/arborescences-du-rome.xls > arborescences-du-rome.ttl
+ref-des-appellations.ttl:  ${ROMEEXCELFILES}/ref-des-appellations.xls ${ROMESCRIPTS}/ref-des-appellations.py.in
+	@PYTHON3@ ${ROMESCRIPTS}/ref-des-appellations.py ${ROMEEXCELFILES}/ref-des-appellations.xls > ref-des-appellations.ttl
+text-sur-les-fiches-rome.ttl: ${ROMEEXCELFILES}/text-sur-les-fiches-rome.xls ${ROMESCRIPTS}/text-sur-les-fiches-rome.py.in
+	@PYTHON3@ ${ROMESCRIPTS}/text-sur-les-fiches-rome.py ${ROMEEXCELFILES}/text-sur-les-fiches-rome.xls > text-sur-les-fiches-rome.ttl
+
+.csv.xls:
+	$(CSV2XLS) -u $< -o $@
+
+.ttl.xls:
+	@PYTHON@ $F.py $< > $@
+
 clean:
-	-rm -rf data.ttl
+	$(RM) -rf data.ttl
 
 cleanall: clean
+
+
+## Junk from here ....
+
+unix_item_arborescence_v328_utf8.ttl: excelfiles/RefRomeCsv/unix_item_arborescence_v328_utf8.xls ${SCRIPTS}/unix_item_arborescence_v328_utf8.py.in 
+	@PYTHON3@ ${SCRIPTS}/unix_item_arborescence_v328_utf8.py ${EXCELFILES}/unix_item_arborescence_v328_utf8.xls > unix_item_arborescence_v328_utf8.ttl
+
+unix_referentiel_appellation_v328_utf8.ttl: ${EXCELFILES}/unix_referentiel_appellation_v328_utf8.xls ${SCRIPTS}/unix_referentiel_appellation_v328_utf8.py.in
+	@PYTHON3@ ${SCRIPTS}/unix_referentiel_appellation_v328_utf8.py ${EXCELFILES}/unix_referentiel_appellation_v328_utf8.xls > unix_referentiel_appellation_v328_utf8.ttl
+unix_texte_v328_utf8.ttl: 
+unix_cr_gd_dp_v328_utf8.ttl: ${EXCELFILES}/unix_cr_gd_dp_v328_utf8.xls ${SCRIPTS}/unix_cr_gd_dp_v328_utf8.py.in
+	@PYTHON3@ ${SCRIPTS}/unix_cr_gd_dp_v328_utf8.py ${EXCELFILES}/unix_cr_gd_dp_v328_utf8.xls > unix_cr_gd_dp_v328_utf8.ttl
+
