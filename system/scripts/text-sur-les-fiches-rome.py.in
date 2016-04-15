@@ -111,7 +111,10 @@ class VocabMappingRome:
             g.add((uri1,RDF.type,SKOS.Concept))
             g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
             g.add((uri1,SKOS.inScheme,ROME))
-            rome.add_value_text(self,item,txt_name,SKOSXL.description,uri1,g)
+            label1 = item[txt_name.lower()]
+            label1_ref=rome.create_label(self,identifier1,label1,g)
+            g.add((uri1,SKOSXL.prefLabel,label1_ref))            
+            # rome.add_value_text(self,item,txt_name,SKOSXL.description,uri1,g)
             rome.add_value_integer(self,item,txt_name_position,VOCAB.txt_name_position,uri1,g)
             rome.add_value_integer(self,item,txt_type_code,VOCAB.ttxt_type_code,uri1,g)                
 

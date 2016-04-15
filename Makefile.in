@@ -43,6 +43,7 @@ data.ttl: excelfiles/Vorlage-for-Mapping-DKZ-ESCO_Stand-240216.xlsx ${XLS2RDF}
 
 ROMETTLFILES=arborescences-du-rome.ttl ref-des-appellations.ttl text-sur-les-fiches-rome.ttl correspondance_rome_isco08_decembre13221.ttl
 
+.PHONY:
 rome:  excelfiles/Rome2016-04 ${ROMETTLFILES}
 	cat ${ROMETTLFILES} | @RAPPER@ -I "junk" -i turtle -o turtle - > rome.ttl
 
@@ -64,11 +65,12 @@ correspondance_rome_isco08_decembre13221.ttl: ${ROMEEXCELFILES}/correspondance_r
 .ttl.xls:
 	@PYTHON@ $F.py $< > $@
 
+.PHONY:
 clean:
-	$(RM) -rf data.ttl
+	$(RM) data.ttl ${ROMETTLFILES}
 
+.PHONY:
 cleanall: clean
-
 
 ## Junk from here ....
 
