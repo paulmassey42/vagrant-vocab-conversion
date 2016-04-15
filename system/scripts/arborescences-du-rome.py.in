@@ -122,8 +122,8 @@ class VocabMappingRome2:
             g.add((uri1,SKOS.topConceptOf,ROME))
         else:
             uri2=self.uri_id(identifier2)
-            g.add((uri2,SKOS.broader,uri1))            
-            g.add((uri1,SKOS.narrower,uri2))
+            g.add((uri2,SKOS.narrower,uri1))            
+            g.add((uri1,SKOS.broader,uri2))
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()

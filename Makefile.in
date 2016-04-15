@@ -41,7 +41,7 @@ data.ttl: excelfiles/Vorlage-for-Mapping-DKZ-ESCO_Stand-240216.xlsx ${XLS2RDF}
 #	unix_cr_gd_dp_v328_utf8.ttl \
 #	unix_texte_v328_utf8.ttl # labels for B1402, etc.
 
-ROMETTLFILES=arborescences-du-rome.ttl ref-des-appellations.ttl text-sur-les-fiches-rome.ttl correspondance_rome_isco08_decembre13221.ttl
+ROMETTLFILES=arborescences-du-rome.ttl ref-des-appellations.ttl text-sur-les-fiches-rome.ttl correspondance_rome_isco08_decembre13221.ttl grande_domains.ttl
 
 .PHONY:
 rome:  excelfiles/Rome2016-04 ${ROMETTLFILES}
@@ -58,6 +58,10 @@ text-sur-les-fiches-rome.ttl: ${ROMEEXCELFILES}/text-sur-les-fiches-rome.xls ${R
 
 correspondance_rome_isco08_decembre13221.ttl: ${ROMEEXCELFILES}/correspondance_rome_isco08_decembre13221.xlsx ${ROMESCRIPTS}/correspondance_rome_isco08_decembre13221.py.in
 	@PYTHON3@ ${ROMESCRIPTS}/correspondance_rome_isco08_decembre13221.py ${ROMEEXCELFILES}/correspondance_rome_isco08_decembre13221.xlsx > correspondance_rome_isco08_decembre13221.ttl
+
+grande_domains.ttl: ${ROMEEXCELFILES}/grande_domains.xls ${ROMESCRIPTS}/grande_domains.py.in
+	@PYTHON3@ ${ROMESCRIPTS}/grande_domains.py ${ROMEEXCELFILES}/grande_domains.xls > grande_domains.ttl
+
 
 .csv.xls:
 	$(CSV2XLS) -u $< -o $@
