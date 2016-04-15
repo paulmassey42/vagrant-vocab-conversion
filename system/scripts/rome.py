@@ -33,7 +33,7 @@ def add_isco(self,item,isco_label,uri,g):
         g.add((uri,ESCOMODEL.memberOfISCOGroup,isco_ref))
 
 def add_isco_raw(self,item,isco_label,uri,g):
-    code = item[isco_label.lower()]
+    code = str(int(item[isco_label.lower()]))
     if code != "" :
         isco_ref = URIRef("http://data.europa.eu/esco/isco2008/Concept/C"+code)
         g.add((uri,ESCOMODEL.memberOfISCOGroup,isco_ref))

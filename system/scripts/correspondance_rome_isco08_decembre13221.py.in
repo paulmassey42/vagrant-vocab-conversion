@@ -105,7 +105,7 @@ class VocabMappingRome:
     def convert_row(self,item,g):
         code_rome_id = item[code_rome.lower()]
         uri = self.uri_id(code_rome_id);        
-        rome.add_isco(self,item,code_isco,uri,g)
+        rome.add_isco_raw(self,item,code_isco,uri,g)
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()

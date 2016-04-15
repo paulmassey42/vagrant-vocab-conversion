@@ -129,22 +129,24 @@ class VocabMappingRome2:
         
     # Main Row translation
     def convert_row(self,item,g):
+        code_ogr_id = str(int(item[code_ogr.lower()]))
         code_rome_id = str(item[code_rome.lower()])
         label1 = item[libelle_appellation_court.lower()]
-        label1_ref=self.create_label(code_rome_id,label1,g)
+        label1_ref=self.create_label(code_ogr_id,label1,g)
         uri1=self.uri_id(code_rome_id)
-        code_ogr_id = str(int(item[code_ogr.lower()]))
         uri_ogr=self.uri_id(code_ogr_id)        
         g.add((uri1,RDF.type,SKOS.Concept))
         g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
         g.add((uri1,SKOS.inScheme,ROME))
         
-        g.add((uri1,VOCAB.has_details,uri_ogr))
-
         g.add((uri_ogr,RDF.type,SKOS.Concept))
         g.add((uri_ogr,RDF.type,ESCOMODEL.SimpleConcept))
         g.add((uri_ogr,SKOS.inScheme,ROME))
         g.add((uri_ogr,SKOSXL.prefLabel,label1_ref))
+
+        g.add((uri1,SKOSXL.narrower,uri_ogr))
+        g.add((uri_ogr,SKOSXL.broader,uri1))
+               
         rome.add_value_integer(self,item,code_ogr,VOCAB.code_ogr,uri_ogr,g)
         rome.add_value_integer(self,item,statut,VOCAB.statut,uri_ogr,g)
         rome.add_value_text(self,item,libelle_appellation_long,

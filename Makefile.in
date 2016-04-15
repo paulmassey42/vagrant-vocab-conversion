@@ -43,16 +43,8 @@ data.ttl: excelfiles/Vorlage-for-Mapping-DKZ-ESCO_Stand-240216.xlsx ${XLS2RDF}
 
 ROMETTLFILES=arborescences-du-rome.ttl ref-des-appellations.ttl text-sur-les-fiches-rome.ttl correspondance_rome_isco08_decembre13221.ttl
 
-rome:  excelfiles/RefRomeCsv ${ROMETTLFILES}
+rome:  excelfiles/Rome2016-04 ${ROMETTLFILES}
 	cat ${ROMETTLFILES} | @RAPPER@ -I "junk" -i turtle -o turtle - > rome.ttl
-
-excelfiles/RefRomeCsv: download/RefRomeCsv.zip
-	mkdir -p excelfiles/RefRomeCsv
-	@UNZIP@ -o -d excelfiles/RefRomeCsv download/RefRomeCsv.zip
-# Translation is manually done for the moment.
-#	for i in excelfiles/RefRomeCsv/*.csv ; do \
-#		LANG="en_US.UTF-8" @CSV2XLS@ -o excelfiles/RefRomeCsv/`basename $$i .csv`.xls $$i ;\
-#	done
 
 arborescences-du-rome.ttl: ${ROMEEXCELFILES}/arborescences-du-rome.xls ${ROMESCRIPTS}/arborescences-du-rome.py.in
 	@PYTHON3@ ${ROMESCRIPTS}/arborescences-du-rome.py ${ROMEEXCELFILES}/arborescences-du-rome.xls > arborescences-du-rome.ttl
