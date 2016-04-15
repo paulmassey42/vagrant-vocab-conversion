@@ -25,13 +25,19 @@ def add_value_label(self,item,label,predicate,uri,g):
     if value != "" :
         g.add((uri,predicate,self.text(self.sanitise_label(value))))
 
-def add_isco(self,item,uri,g):
+def add_isco(self,item,isco_label,uri,g):
     value = item[isco_label.lower()]
     if value != "" :
         code=value.split()[1]
         isco_ref = URIRef("http://data.europa.eu/esco/isco2008/Concept/C"+code)
         g.add((uri,ESCOMODEL.memberOfISCOGroup,isco_ref))
 
+def add_isco_raw(self,item,isco_label,uri,g):
+    code = item[isco_label.lower()]
+    if code != "" :
+        isco_ref = URIRef("http://data.europa.eu/esco/isco2008/Concept/C"+code)
+        g.add((uri,ESCOMODEL.memberOfISCOGroup,isco_ref))
+        
 def uri(self, name):
     '''Return the URI of name.'''
     # note: put a lower() before the encode() will mean a case will 

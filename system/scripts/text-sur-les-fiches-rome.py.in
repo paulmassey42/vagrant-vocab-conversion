@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!@PYTHON@
+# -*- coding: utf-8 -*-
 #
 # Originally derived from one coming from the MDR project.
 #
@@ -102,14 +103,16 @@ class VocabMappingRome:
 
     # Main Row translation
     def convert_row(self,item,g):
-        identifier1 = item[rome_profession_card_code.lower()]
-        uri1=self.uri_id(identifier1)
-        g.add((uri1,RDF.type,SKOS.Concept))
-        g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
-        g.add((uri1,SKOS.inScheme,ROME))
-        rome.add_value_text(self,item,txt_name,SKOSXL.description,uri1,g)
-        rome.add_value_integer(self,item,txt_name_position,VOCAB.txt_name_position,uri1,g)
-        rome.add_value_integer(self,item,txt_type_code,VOCAB.txt_type_code,uri1,g)                
+        code_type_texte = item[txt_name_position.lower()]
+        if code_type_texte == "0":
+            identifier1 = item[rome_profession_card_code.lower()]
+            uri1=self.uri_id(identifier1)
+            g.add((uri1,RDF.type,SKOS.Concept))
+            g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
+            g.add((uri1,SKOS.inScheme,ROME))
+            rome.add_value_text(self,item,txt_name,SKOSXL.description,uri1,g)
+            rome.add_value_integer(self,item,txt_name_position,VOCAB.txt_name_position,uri1,g)
+            rome.add_value_integer(self,item,txt_type_code,VOCAB.txt_type_code,uri1,g)                
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
