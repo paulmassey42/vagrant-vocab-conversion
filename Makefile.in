@@ -48,10 +48,13 @@ rome:  excelfiles/Rome2016-04 ${ROMETTLFILES}
 
 arborescences-du-rome.ttl: ${ROMEEXCELFILES}/arborescences-du-rome.xls ${ROMESCRIPTS}/arborescences-du-rome.py.in
 	@PYTHON3@ ${ROMESCRIPTS}/arborescences-du-rome.py ${ROMEEXCELFILES}/arborescences-du-rome.xls > arborescences-du-rome.ttl
+
 ref-des-appellations.ttl:  ${ROMEEXCELFILES}/ref-des-appellations.xls ${ROMESCRIPTS}/ref-des-appellations.py.in
 	@PYTHON3@ ${ROMESCRIPTS}/ref-des-appellations.py ${ROMEEXCELFILES}/ref-des-appellations.xls > ref-des-appellations.ttl
+
 text-sur-les-fiches-rome.ttl: ${ROMEEXCELFILES}/text-sur-les-fiches-rome.xls ${ROMESCRIPTS}/text-sur-les-fiches-rome.py.in
 	@PYTHON3@ ${ROMESCRIPTS}/text-sur-les-fiches-rome.py ${ROMEEXCELFILES}/text-sur-les-fiches-rome.xls > text-sur-les-fiches-rome.ttl
+
 correspondance_rome_isco08_decembre13221.ttl: ${ROMEEXCELFILES}/correspondance_rome_isco08_decembre13221.xlsx ${ROMESCRIPTS}/correspondance_rome_isco08_decembre13221.py.in
 	@PYTHON3@ ${ROMESCRIPTS}/correspondance_rome_isco08_decembre13221.py ${ROMEEXCELFILES}/correspondance_rome_isco08_decembre13221.xlsx > correspondance_rome_isco08_decembre13221.ttl
 

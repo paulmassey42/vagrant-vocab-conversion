@@ -144,8 +144,8 @@ class VocabMappingRome2:
         g.add((uri_ogr,SKOS.inScheme,ROME))
         g.add((uri_ogr,SKOSXL.prefLabel,label1_ref))
 
-        g.add((uri1,SKOSXL.narrower,uri_ogr))
-        g.add((uri_ogr,SKOSXL.broader,uri1))
+        g.add((uri1,SKOS.narrower,uri_ogr))
+        g.add((uri_ogr,SKOS.broader,uri1))
                
         rome.add_value_integer(self,item,code_ogr,VOCAB.code_ogr,uri_ogr,g)
         rome.add_value_integer(self,item,statut,VOCAB.statut,uri_ogr,g)
