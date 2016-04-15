@@ -63,24 +63,6 @@ class VocabMappingRome2:
             yield {name:sheet.cell(i, j).value
                    for j, name in enumerate(header)}
 
-    def uri_id(self, id):
-        '''Return the URI of the id.'''
-        return self.ns.term(''.join(str(id).split()))
-
-    def text(self, text):
-        '''Return an RDF Literal with the text.'''
-        return Literal(text, lang="fr")
-
-    def rdfinteger(self, strin):
-        '''Return an RDF Literal with the text.'''
-        return Literal(int(strin),datatype=XSD.integer)
-        
-    def sanitise_label(self, text):
-        '''Return a sanitised label - new newlines, tabs, '|' or ',' characters'''
-        str0 = text.replace("\n"," ").replace("\r"," ").replace("\t"," ")
-        str1 = str0.replace("|"," ").replace(","," ")
-        return str1;
-    
     def split(self, values):
         '''Split a comma-separated list of values.'''
         return re.split(r"\s*,\s*", values)
@@ -109,19 +91,19 @@ class VocabMappingRome2:
         identifier1 = item[code_noeud.lower()]
         label1 = item[libelle_item_arbo.lower()]
         label1_ref=rome.create_label(self,identifier1,label1,g)
-        uri1=self.uri_id(identifier1)
+        uri1=rome.uri_id(self,identifier1)
         
         g.add((uri1,RDF.type,SKOS.Concept))
         g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
         g.add((uri1,SKOS.inScheme,ROME))
         g.add((uri1,SKOSXL.prefLabel,label1_ref))
-        rome.add_value_integer(self,item,code_ogr,VOCAB.ogr_code,uri1,g)
+        rome.add_value_integer(item,code_ogr,VOCAB.ogr_code,uri1,g)
 
         identifier2 = item[code_pere.lower()]
         if identifier2 == "":
             g.add((uri1,SKOS.topConceptOf,ROME))
         else:
-            uri2=self.uri_id(identifier2)
+            uri2=rome.uri_id(self,identifier2)
             g.add((uri2,SKOS.narrower,uri1))            
             g.add((uri1,SKOS.broader,uri2))
 

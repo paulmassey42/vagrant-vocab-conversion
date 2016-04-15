@@ -63,28 +63,6 @@ class VocabMappingRome:
             yield {name:sheet.cell(i, j).value
                    for j, name in enumerate(header)}
 
-    def uri_id(self, id):
-        '''Return the URI of the id.'''
-        return self.ns.term(''.join(str(id).split()))
-
-    def text(self, text):
-        '''Return an RDF Literal with the text.'''
-        return Literal(text, lang="fr")
-
-    def rdfinteger(self, strin):
-        '''Return an RDF Literal with the text.'''
-        return Literal(int(strin),datatype=XSD.integer)
-        
-    def sanitise_label(self, text):
-        '''Return a sanitised label - new newlines, tabs, '|' or ',' characters'''
-        str0 = text.replace("\n"," ").replace("\r"," ").replace("\t"," ")
-        str1 = str0.replace("|"," ").replace(","," ")
-        return str1;
-    
-    def split(self, values):
-        '''Split a comma-separated list of values.'''
-        return re.split(r"\s*,\s*", values)
-
     # Main methods
 
     def convert(self):
@@ -107,9 +85,9 @@ class VocabMappingRome:
         card_code = item[rome_profession_card_code.lower()]
         main_code = item[main_prof_area_code.lower()]
         prof_code = item[professional_area_code.lower()]
-        card_code_uri = self.uri_id(card_code)
-        main_code_uri = self.uri_id(main_code)
-        prof_code_uri = self.uri_id(prof_code)
+        card_code_uri = rome.uri_id(self,card_code)
+        main_code_uri = rome.uri_id(self,main_code)
+        prof_code_uri = rome.uri_id(self,prof_code)
 
         main_label = item[main_prof_area_name.lower()]
         main_code_label = rome.create_label(self,main_code,main_label,g)

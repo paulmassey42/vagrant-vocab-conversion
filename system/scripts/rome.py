@@ -10,20 +10,28 @@ ESCOMODEL = rdflib.Namespace("http://data.europa.eu/esco/model#")
 
 ROME = URIRef("http://data.europa.eu/esco/ConceptScheme/rome")
 
-def add_value_integer(self,item,label,predicate,uri,g):
-    value = item[label.lower()]
-    if value != "" :
-        g.add((uri,predicate,self.rdfinteger(value)))           
+def text(text):
+    '''Return an RDF Literal with the text.'''
+    return Literal(text, lang="fr")
 
-def add_value_text(self,item,label,predicate,uri,g):
+def rdfinteger(strin):
+    '''Return an RDF Literal with the text.'''
+    return Literal(int(strin),datatype=XSD.integer)
+        
+def add_value_integer(item,label,predicate,uri,g):
     value = item[label.lower()]
     if value != "" :
-        g.add((uri,predicate,self.text(value)))
+        g.add((uri,predicate,rdfinteger(value)))           
 
-def add_value_label(self,item,label,predicate,uri,g):
+def add_value_text(item,label,predicate,uri,g):
     value = item[label.lower()]
     if value != "" :
-        g.add((uri,predicate,self.text(self.sanitise_label(value))))
+        g.add((uri,predicate,text(value)))
+
+def add_value_label(item,label,predicate,uri,g):
+    value = item[label.lower()]
+    if value != "" :
+        g.add((uri,predicate,text(sanitise_label(value))))
 
 def add_isco(self,item,isco_label,uri,g):
     value = item[isco_label.lower()]
@@ -45,10 +53,24 @@ def uri(self, name):
     return self.ns.term(URIRef(hashlib.md5(name.encode()).hexdigest()))
         
 def create_label(self,id,label,g):
-    uri = self.uri_id("L"+''.join(str(id).split()))
+    uri = uri_id(self,"L"+''.join(str(id).split()))
     g.add((uri,RDF.type,SKOSXL.Label))
     g.add((uri,RDF.type,SKOSTHES.PreferredTerm))
     g.add((uri,RDF.type,ESCOMODEL.Label)) 
-    g.add((uri,SKOSXL.literalForm,self.text(self.sanitise_label(label))))
+    g.add((uri,SKOSXL.literalForm,text(sanitise_label(label))))
     return uri
+
+def sanitise_label(text):
+    '''Return a sanitised label - new newlines, tabs, '|' or ',' characters'''
+    str0 = text.replace("\n"," ").replace("\r"," ").replace("\t"," ")
+    str1 = str0.replace("|"," ").replace(","," ")
+    return str1;
+
+def uri_id(self, id):
+    '''Return the URI of the id.'''
+    return self.ns.term(''.join(str(id).split()))
+
+def split(self, values):
+    '''Split a comma-separated list of values.'''
+    return re.split(r"\s*,\s*", values)
 

@@ -62,30 +62,6 @@ class VocabMappingRome2:
             yield {name:sheet.cell(i, j).value
                    for j, name in enumerate(header)}
 
-    def uri(self, name):
-        '''Return the URI of name.'''
-        # note: put a lower() before the encode() will mean a case will 
-        # be ignored in the original data sheet (or correct the data sheet).
-        return self.ns.term(URIRef(hashlib.md5(name.encode()).hexdigest()))
-
-    def uri_id(self, id):
-        '''Return the URI of the id.'''
-        return self.ns.term(id)
-
-    def text(self, text):
-        '''Return an RDF Literal with the text.'''
-        return Literal(text, lang="fr")
-
-    def rdfinteger(self, strin):
-        '''Return an RDF Literal with the text.'''
-        return Literal(int(strin),datatype=XSD.integer)
-        
-    def sanitise_label(self, text):
-        '''Return a sanitised label - new newlines, tabs, '|' or ',' characters'''
-        str0 = text.replace("\n"," ").replace("\r"," ").replace("\t"," ")
-        str1 = str0.replace("|"," ").replace(","," ")
-        return str1;
-    
     def split(self, values):
         '''Split a comma-separated list of values.'''
         return re.split(r"\s*,\s*", values)
@@ -107,19 +83,6 @@ class VocabMappingRome2:
             if testrow != "" :
                 self.convert_row(item,g)
 
-    def create_label(self,id,label,g):
-        uri = self.uri_id("L"+id)
-        g.add((uri,RDF.type,SKOSXL.Label))
-        g.add((uri,RDF.type,SKOSTHES.PreferredTerm))
-        g.add((uri,RDF.type,ESCOMODEL.Label)) 
-        g.add((uri,SKOSXL.literalForm,self.text(self.sanitise_label(label))))
-        return uri
-        
-    def add_value_integer(self,item,label,predicate,uri,g):
-        value = item[label.lower()]
-        if value != "" :
-            g.add((uri,predicate,self.rdfinteger(value)))           
-
     def add_isco(self,item,uri,g):
         value = item[isco_label.lower()]
         if value != "" :
@@ -132,9 +95,9 @@ class VocabMappingRome2:
         code_ogr_id = str(int(item[code_ogr.lower()]))
         code_rome_id = str(item[code_rome.lower()])
         label1 = item[libelle_appellation_court.lower()]
-        label1_ref=self.create_label(code_ogr_id,label1,g)
-        uri1=self.uri_id(code_rome_id)
-        uri_ogr=self.uri_id(code_ogr_id)        
+        label1_ref=rome.create_label(self,code_ogr_id,label1,g)
+        uri1=rome.uri_id(self,code_rome_id)
+        uri_ogr=rome.uri_id(self,code_ogr_id)        
         g.add((uri1,RDF.type,SKOS.Concept))
         g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
         g.add((uri1,SKOS.inScheme,ROME))
@@ -147,9 +110,9 @@ class VocabMappingRome2:
         g.add((uri1,SKOS.narrower,uri_ogr))
         g.add((uri_ogr,SKOS.broader,uri1))
                
-        rome.add_value_integer(self,item,code_ogr,VOCAB.code_ogr,uri_ogr,g)
-        rome.add_value_integer(self,item,statut,VOCAB.statut,uri_ogr,g)
-        rome.add_value_text(self,item,libelle_appellation_long,
+        rome.add_value_integer(item,code_ogr,VOCAB.code_ogr,uri_ogr,g)
+        rome.add_value_integer(item,statut,VOCAB.statut,uri_ogr,g)
+        rome.add_value_text(item,libelle_appellation_long,
                             SKOSXL.description,uri_ogr,g)
                 
 if __name__ == "__main__":

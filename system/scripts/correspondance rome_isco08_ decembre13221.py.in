@@ -62,28 +62,6 @@ class VocabMappingRome:
             yield {name:sheet.cell(i, j).value
                    for j, name in enumerate(header)}
 
-    def uri_id(self, id):
-        '''Return the URI of the id.'''
-        return self.ns.term(''.join(str(id).split()))
-
-    def text(self, text):
-        '''Return an RDF Literal with the text.'''
-        return Literal(text, lang="fr")
-
-    def rdfinteger(self, strin):
-        '''Return an RDF Literal with the text.'''
-        return Literal(int(strin),datatype=XSD.integer)
-        
-    def sanitise_label(self, text):
-        '''Return a sanitised label - new newlines, tabs, '|' or ',' characters'''
-        str0 = text.replace("\n"," ").replace("\r"," ").replace("\t"," ")
-        str1 = str0.replace("|"," ").replace(","," ")
-        return str1;
-    
-    def split(self, values):
-        '''Split a comma-separated list of values.'''
-        return re.split(r"\s*,\s*", values)
-
     # Main methods
 
     def convert(self):
@@ -104,7 +82,7 @@ class VocabMappingRome:
     # Main Row translation
     def convert_row(self,item,g):
         code_rome_id = item[code_rome.lower()]
-        uri = self.uri_id(code_rome_id);        
+        uri = rome.uri_id(self,code_rome_id);        
         rome.add_isco_raw(self,item,code_isco,uri,g)
 
 if __name__ == "__main__":

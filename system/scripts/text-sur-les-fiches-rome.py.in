@@ -62,28 +62,6 @@ class VocabMappingRome:
             yield {name:sheet.cell(i, j).value
                    for j, name in enumerate(header)}
 
-    def uri_id(self, id):
-        '''Return the URI of the id.'''
-        return self.ns.term(''.join(str(id).split()))
-
-    def text(self, text):
-        '''Return an RDF Literal with the text.'''
-        return Literal(text, lang="fr")
-
-    def rdfinteger(self, strin):
-        '''Return an RDF Literal with the text.'''
-        return Literal(int(strin),datatype=XSD.integer)
-        
-    def sanitise_label(self, text):
-        '''Return a sanitised label - new newlines, tabs, '|' or ',' characters'''
-        str0 = text.replace("\n"," ").replace("\r"," ").replace("\t"," ")
-        str1 = str0.replace("|"," ").replace(","," ")
-        return str1;
-    
-    def split(self, values):
-        '''Split a comma-separated list of values.'''
-        return re.split(r"\s*,\s*", values)
-
     # Main methods
 
     def convert(self):
@@ -107,16 +85,16 @@ class VocabMappingRome:
         code_type_code = item[txt_type_code.lower()]
         if (int(code_type_texte) == 0) & (int(code_type_code) == 1):
             identifier1 = item[rome_profession_card_code.lower()]
-            uri1=self.uri_id(identifier1)
+            uri1=rome.uri_id(self,identifier1)
             g.add((uri1,RDF.type,SKOS.Concept))
             g.add((uri1,RDF.type,ESCOMODEL.SimpleConcept))
             g.add((uri1,SKOS.inScheme,ROME))
             # label1 = item[txt_name.lower()]
             # label1_ref=rome.create_label(self,identifier1,label1,g)
             # g.add((uri1,SKOSXL.prefLabel,label1_ref))            
-            rome.add_value_text(self,item,txt_name,SKOSXL.description,uri1,g)
-            rome.add_value_integer(self,item,txt_name_position,VOCAB.txt_name_position,uri1,g)
-            rome.add_value_integer(self,item,txt_type_code,VOCAB.ttxt_type_code,uri1,g)                
+            rome.add_value_text(item,txt_name,SKOSXL.description,uri1,g)
+            rome.add_value_integer(item,txt_name_position,VOCAB.txt_name_position,uri1,g)
+            rome.add_value_integer(item,txt_type_code,VOCAB.txt_type_code,uri1,g)                
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
