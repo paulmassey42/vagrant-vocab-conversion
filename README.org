@@ -2,21 +2,26 @@
 
 * Introduction
 
-The development environment for the vocab conversion
-script. Assumption is that a Ubuntu/Debian compactible system is
-available (use vagrant if on windows). Otherwise the bootstrap.sh
-script will indicate what is needed for the most part.
+This is the *development environment* for the vocab conversion scripts
+as currently used. The assumption is that a Ubuntu/Debian compactible
+system is being used (if on windows the vagrant description will
+provide the necessary - otherwise the bootstrap.sh script will
+indicate what is needed in the way of packaged to be installed).
 
-Outside of the vagrant environment, configure will check what is
-installed, etc. and fill in the appropriate values in the various .in
-files (or flag an error if something is missing).
+If outside of the vagrant environment, there is a configure file which
+will need to be run and which will check what is installed, etc. and
+fill in the appropriate values in the various .in files (or flag an
+error if something is missing). 
 
-* Script
+* Scripts Avalable
 
-Uses:
+The scripts are all found in system/scripts and at present use:
+
 - Python 3
 - [[http://rdflib.readthedocs.org/en/stable/index.html][Rdflib]] for RDF operations
 - [[https://secure.simplistix.co.uk/svn/xlrd/trunk/xlrd/doc/xlrd.html?p=4966][xlrd]] for parsing the excel input files.
+
+See bootstrap.sh for additional requirements.
 
 * Usage
 
@@ -39,12 +44,13 @@ the build.
 
 * End result
 
-Can be found in the 'data.ttl' file.
+Can be found in the 'data.ttl' file or in the various .ttl files
+placed where the makefile indicates (at present in the top-level).
 
 * TODOs
 
-Include build option for:
-
-https://pythonhosted.org/django-jython/war-deployment.html
+- Include build option for:
+  https://pythonhosted.org/django-jython/war-deployment.html
+- simplify the generic looking rules in the makefile.in file.
 
 
