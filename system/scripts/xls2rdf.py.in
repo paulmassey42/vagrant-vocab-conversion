@@ -100,8 +100,8 @@ class VocabMappingRome2:
         return g
 
     def convert_rows(self, g):
-        '''Add the contents of the 'Sheet1' sheet to the graph g.'''
-        for item in self.read_sheet("Sheet1", ""):
+        '''Add the contents of the 'Tabelle1' sheet to the graph g.'''
+        for item in self.read_sheet("Tabelle1", ""):
             testrow = item[code_ogr.lower()]
             # check row is not empty
             if testrow != "" :
